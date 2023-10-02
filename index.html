@@ -44,6 +44,7 @@
         <input type="number" id="percentage" placeholder="Процент увеличения">
         <button onclick="onIncreasePercentage()">Увеличить цены</button>
         <button onclick="pasteFromClipboard()">Вставить из буфера</button>
+        <button onclick="copyWithoutSymbol()">Скопировать без '₽'</button>
         <label for="result">Результат:</label>
         <textarea id="result" readonly></textarea>
     </div>
@@ -88,7 +89,7 @@
         function increasePrices(prices, percentage) {
             const increasedPrices = [];
             for (const price of prices) {
-                const originalPrice = parseFloat(price.replace(/₽|,/g, '').replace(/\s+/g, '')); // Удаляем пробелы только из цен
+                const originalPrice = parseFloat(price.replace(/₽|,|\s/g, ''));
                 const increasedPrice = Math.ceil(originalPrice * (1 + percentage / 100) / 100) * 100;
                 increasedPrices.push(increasedPrice.toLocaleString() + '₽');
             }
@@ -114,6 +115,16 @@
                 document.getElementById('text').value = textWithoutDots;
             }).catch((error) => {
                 console.error('Ошибка при вставке из буфера: ', error);
+            });
+        }
+
+        function copyWithoutSymbol() {
+            const resultText = document.getElementById('result').value;
+            const textWithoutSymbol = resultText.replace(/₽/g, '');
+            navigator.clipboard.writeText(textWithoutSymbol).then(() => {
+                alert('Текст без символа "₽" скопирован в буфер обмена.');
+            }).catch((error) => {
+                console.error('Ошибка при копировании в буфер обмена: ', error);
             });
         }
     </script>
