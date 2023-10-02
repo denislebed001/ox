@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Увеличение цен</title>
+    <style>
+        /* Ваш стиль CSS здесь */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+
+        button {
+            display: block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Увеличение цен</h1>
+        <label for="text">Введите текст:</label>
+        <textarea id="text" placeholder="Введите текст с ценами"></textarea>
+        <label for="percentage">Введите процент увеличения:</label>
+        <input type="number" id="percentage" placeholder="Процент увеличения">
+        <button onclick="onIncreasePercentage()">Увеличить цены</button>
+        <button onclick="pasteFromClipboard()">Вставить из буфера</button>
+        <label for="result">Результат:</label>
+        <textarea id="result" readonly></textarea>
+    </div>
+
+    <script>
+        // JavaScript-функции из вашего кода
+        function extractPrices(text) {
+            const mainPattern = /(?<!\d)(\d{1,4}(?:,\d{3})*(?:\.\d{1,2})?)(?:₽🇨🇳)?/g;
+            const fourDigitPattern = /(?<!\d)(\d{4})(?!\d)(?:\s*₽)?/g;
+            const fiveDigitPattern = /(?<!\d)(\d{5})(?!\d)(?:\s*₽)?/g;
+            const sixDigitPattern = /(?<!\d)(\d{6})(?!\d)(?:\s*₽)?/g;
+            const allPrices = [];
+
+            let matches = text.match(mainPattern);
+            if (matches) {
+                matches.forEach(match => {
+                    if (!match.includes('(')) {
+                        const formattedPrice = parseFloat(match.replace(/,|\s|₽/g, ''));
+                        allPrices.push(formattedPrice.toFixed(2) + '₽');
+                    }
+                });
+            }
+
+            matches = text.match(fourDigitPattern);
+            if (matches) {
+                allPrices.push(...matches);
+            }
+
+            matches = text.match(fiveDigitPattern);
+            if (matches) {
+                allPrices.push(...matches);
+            }
+
+            matches = text.match(sixDigitPattern);
+            if (matches) {
+                allPrices.push(...matches);
+            }
+
+            return allPrices;
+        }
+
+        function increasePrices(prices, percentage) {
+            const increasedPrices = [];
+            for (const price of prices) {
+                const originalPrice = parseFloat(price.replace(/₽|,/g, '').replace(/\s+/g, '')); // Удаляем пробелы только из цен
+                const increasedPrice = Math.ceil(originalPrice * (1 + percentage / 100) / 100) * 100;
+                increasedPrices.push(increasedPrice.toLocaleString() + '₽');
+            }
+            return increasedPrices;
+        }
+
+        function onIncreasePercentage() {
+            const inputText = document.getElementById('text').value;
+            const percentage = parseFloat(document.getElementById('percentage').value);
+            const resultPrices = extractPrices(inputText);
+            const increasedPrices = increasePrices(resultPrices, percentage);
+            const resultTextArea = document.getElementById('result');
+            let formattedText = inputText;
+            increasedPrices.forEach((price, index) => {
+                formattedText = formattedText.replace(resultPrices[index], price);
+            });
+            resultTextArea.value = formattedText;
+        }
+
+        function pasteFromClipboard() {
+            navigator.clipboard.readText().then((text) => {
+                const textWithoutDots = text.replace(/\./g, ''); // Удаляем все точки из текста
+                document.getElementById('text').value = textWithoutDots;
+            }).catch((error) => {
+                console.error('Ошибка при вставке из буфера: ', error);
+            });
+        }
+    </script>
+</body>
+</html>
