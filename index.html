@@ -58,8 +58,10 @@
 
     <script>
         function preprocessText(text) {
+            text = text.replace(/~\d{2,3}\.\d{3}₽|~ \d{2,3}\.\d{3}₽/g, "");
             text = text.replace(/~ \*\(\d{2,3}\.\d{3}₽\)\*|~ \*\d{2,3}\.\d{3}₽\*|\*\~\d{2,3}\.\d{3}₽\*|\*\~\d{2,3}\.\d{3}\*/g, "");
-            text = text.replace(/Курс 💲\*\~\d{2}\.X₽\*/g, "");
+            text = text.replace(/Курс 💲~\d{2}\.X₽|Курс 💲~\d{2}\.₽/g, "");
+            text = text.replace(/~ \(\d{2,3}\.\d{3}₽\)|\*\~\d{2,3}\.\d{3}₽\*/g, "");
             text = text.replace(/ AppleDubai.ru /g, "MobilePriceOpt");
             text = text.replace(/\d{2}\.\d{2}\.\d{4}/g, "");
             return text;
